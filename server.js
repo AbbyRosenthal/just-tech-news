@@ -4,10 +4,24 @@ const sequelize = require('./config/connection');
 const path = require('path');
 const exphbs = require('express-handlebars');
 const hbs = exphbs.create({});
+const session = require('express-session');
+
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
+
+const sess = {
+  secret: 'Super secret secret',
+  cookie: {},
+  resave: false,
+  saveUnitialized: true,
+  store: new SequelizeStore ({
+    db: sequeleize
+  })
+};
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+app.use(session(sess));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 //built in express middleware to serve contents of a folder as static assets
