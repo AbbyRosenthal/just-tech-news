@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { User } = require('../../models');
+const { User, Post, Vote } = require('../../models');
 
 // get all users
 router.get('/', (req, res) => {
@@ -15,10 +15,26 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
     User.findOne({
+        //leaver password out when returning data
         attributes: { exclude: ['password'] },
         where: {
             id: req.params.id
-        }
+        },
+        //this includes what the user voted on!
+        include: [
+            {
+                model: Post,
+                attributes: ['id', 'title', 'post_url', 'created_at']
+            },
+            {
+                //inclulde Post model but going through Vote table
+                model: Post,
+                attributes: ['title'],
+                through: Vote,
+                //this is the name of the column where we will find the info of what they voted on
+                as: 'voted_posts'
+            }
+        ]
     })
         .then(dbUserData => {
             if (!dbUserData) {
